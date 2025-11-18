@@ -1,0 +1,58 @@
+# Simplified Gitea configuration for EKS Auto Mode
+# Uses SQLite (no external database) and minimal persistence
+
+gitea:
+  admin:
+    username: "gitea"
+    password: "gitea123"
+    email: "gitea@local.com"
+
+  config:
+    database:
+      DB_TYPE: sqlite3
+    session:
+      PROVIDER: memory
+    cache:
+      ADAPTER: memory
+    queue:
+      TYPE: level
+    server:
+      DOMAIN: gitea.local
+      ROOT_URL: http://gitea.local:3000
+      DISABLE_SSH: true
+    security:
+      INSTALL_LOCK: true
+    service:
+      DISABLE_REGISTRATION: false
+      REQUIRE_SIGNIN_VIEW: false
+    repository:
+      DEFAULT_BRANCH: main
+
+service:
+  http:
+    type: ClusterIP # Changed from LoadBalancer to avoid NLB costs
+    port: 3000
+
+# Disable persistence for simplicity (data will be lost on pod restart)
+# For production, configure proper storage
+persistence:
+  enabled: false
+
+# Explicitly disable all external databases
+postgresql:
+  enabled: false
+
+postgresql-ha:
+  enabled: false
+
+mysql:
+  enabled: false
+
+mariadb:
+  enabled: false
+
+memcached:
+  enabled: false
+
+redis-cluster:
+  enabled: false

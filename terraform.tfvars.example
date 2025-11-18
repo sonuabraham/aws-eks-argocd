@@ -1,0 +1,27 @@
+# Copy this file to terraform.tfvars and update with your actual values
+# 
+# To find your existing resources, run:
+# aws eks list-clusters --region us-west-2
+# aws eks describe-cluster --name YOUR_CLUSTER --region us-west-2 --query 'cluster.resourcesVpcConfig.vpcId'
+
+# AWS Region where your existing cluster is located
+region = "us-west-2"
+
+# Name of your existing EKS cluster (REQUIRED - replace with actual name)
+cluster_name = "REPLACE_WITH_YOUR_ACTUAL_CLUSTER_NAME"
+
+# VPC ID of your existing VPC (REQUIRED - replace with actual VPC ID)
+vpc_id = "REPLACE_WITH_YOUR_ACTUAL_VPC_ID"
+
+# Enable Gitea installation
+enable_gitea = true
+
+# Enable ArgoCD installation (set to false if already installed on your cluster)
+enable_argocd = false
+
+# Tags to apply to resources
+tags = {
+  Terraform   = "true"
+  Environment = "workshop"
+  Project     = "gitea-deployment"
+}

@@ -1,0 +1,20 @@
+# Copy this file to terraform.tfvars and update with your values
+
+# AWS Region
+region = "us-east-1"
+
+# EKS Cluster Name (from your existing cluster)
+cluster_name = "hub-cluster"
+
+# Enable GitOps bootstrap (creates ArgoCD Applications for Gitea repos)
+enable_gitops_bootstrap = true
+
+# Gitea URL (internal cluster service URL)
+gitea_url = "http://gitea-http.gitea.svc.cluster.local:3000"
+
+# Tags
+tags = {
+  Terraform   = "true"
+  Environment = "workshop"
+  Project     = "argocd-bootstrap"
+}
