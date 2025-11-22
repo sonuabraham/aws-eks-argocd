@@ -1,0 +1,12 @@
+# Spoke Cluster Configuration
+# Note: Cluster name will be "spoke-${terraform.workspace}"
+# Use: terraform workspace new staging (or production)
+
+eks_admin_role_name = "WSParticipantRole"
+kubernetes_version  = "1.32"
+aws_region          = "us-east-1"
+
+# Note: VPC is reused from ../vpc/terraform.tfstate
+# Note: ArgoCD and other addons are disabled on spoke cluster (managed from hub)
+
+addons = {}

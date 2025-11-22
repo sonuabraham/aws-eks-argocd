@@ -1,0 +1,6 @@
+sonu@sonu-laptop:~/study/aws/workshops/argocd-eks$ argocd login k8s-argocd-argocdse-24d1a71bd1-de72757d55b560ed.elb.us-east-1.amazonaws.com --username admin --password h39UeWih8AeGsctU --insecure
+WARNING: server is not configured with TLS. Proceed (y/n)? y
+'admin:login' logged in successfully
+Context 'k8s-argocd-argocdse-24d1a71bd1-de72757d55b560ed.elb.us-east-1.amazonaws.com' updated
+sonu@sonu-laptop:~/study/aws/workshops/argocd-eks$ argocd repo add http://gitea-http.gitea.svc.cluster.local:3000/gitea/eks-blueprints-workshop-gitops-apps.git --name guestbookrepo --username gitea --password gitea123
+Repository 'http://gitea-http.gitea.svc.cluster.local:3000/gitea/eks-blueprints-workshop-gitops-apps.git' added

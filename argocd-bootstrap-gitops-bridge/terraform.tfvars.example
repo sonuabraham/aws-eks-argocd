@@ -1,0 +1,23 @@
+# EKS Cluster Configuration
+cluster_name = "your-eks-cluster-name"
+region       = "us-west-2"
+environment  = "dev"
+
+# ArgoCD Configuration
+argocd_namespace     = "argocd"
+argocd_chart_version = "7.8.13"
+
+# Addons Metadata (optional)
+addons_metadata = {
+  aws_cluster_name = "your-eks-cluster-name"
+  aws_region       = "us-west-2"
+}
+
+# Addons Configuration (optional)
+addons = {
+  enable_aws_load_balancer_controller = true
+  enable_metrics_server               = true
+}
+
+# Applications Configuration (optional)
+apps = {}

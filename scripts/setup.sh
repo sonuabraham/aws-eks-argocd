@@ -36,20 +36,74 @@ fi
 
 echo "✅ All prerequisites met!"
 
-# Create terraform.tfvars if it doesn't exist
-if [ ! -f terraform.tfvars ]; then
-    echo "📝 Creating terraform.tfvars from example..."
-    cp terraform.tfvars.example terraform.tfvars
-    echo "✅ Please edit terraform.tfvars with your preferred settings"
+# Setup Gitea bootstrap
+echo "🔧 Setting up Gitea bootstrap..."
+if [ ! -f gitea-bootstrap/terraform.tfvars ]; then
+    echo "📝 Creating gitea-bootstrap/terraform.tfvars from example..."
+    cp gitea-bootstrap/terraform.tfvars.example gitea-bootstrap/terraform.tfvars
+    echo "⚠️  Please edit gitea-bootstrap/terraform.tfvars with your cluster settings"
+else
+    echo "✅ gitea-bootstrap/terraform.tfvars already exists"
 fi
 
-# Initialize Terraform
-echo "🔧 Initializing Terraform..."
+cd gitea-bootstrap
 terraform init
+cd ..
 
+# Setup ArgoCD bootstrap (Helm method)
+echo "🔧 Setting up ArgoCD bootstrap (Helm)..."
+if [ ! -f argocd-bootstrap-helm/terraform.tfvars ]; then
+    echo "📝 Creating argocd-bootstrap-helm/terraform.tfvars from example..."
+    cp argocd-bootstrap-helm/terraform.tfvars.example argocd-bootstrap-helm/terraform.tfvars
+    echo "⚠️  Please edit argocd-bootstrap-helm/terraform.tfvars with your cluster settings"
+else
+    echo "✅ argocd-bootstrap-helm/terraform.tfvars already exists"
+fi
+
+cd argocd-bootstrap-helm
+terraform init
+cd ..
+
+# Setup ArgoCD bootstrap (GitOps Bridge method)
+echo "🔧 Setting up ArgoCD bootstrap (GitOps Bridge)..."
+if [ ! -f argocd-bootstrap-gitops-bridge/terraform.tfvars ]; then
+    echo "📝 Creating argocd-bootstrap-gitops-bridge/terraform.tfvars from example..."
+    cp argocd-bootstrap-gitops-bridge/terraform.tfvars.example argocd-bootstrap-gitops-bridge/terraform.tfvars
+    echo "⚠️  Please edit argocd-bootstrap-gitops-bridge/terraform.tfvars with your cluster settings"
+else
+    echo "✅ argocd-bootstrap-gitops-bridge/terraform.tfvars already exists"
+fi
+
+cd argocd-bootstrap-gitops-bridge
+terraform init
+cd ..
+
+echo ""
 echo "✅ Setup complete! Next steps:"
-echo "1. Edit terraform.tfvars with your settings"
-echo "2. Run: terraform plan"
-echo "3. Run: terraform apply"
-echo "4. Run: ./scripts/setup-gitea-repos.sh (after terraform apply)"
+echo ""
+echo "1. Edit configuration files with your cluster details:"
+echo "   - gitea-bootstrap/terraform.tfvars"
+echo "   - argocd-bootstrap-helm/terraform.tfvars (if using Helm method)"
+echo "   - argocd-bootstrap-gitops-bridge/terraform.tfvars (if using GitOps Bridge method)"
+echo ""
+echo "2. Deploy Gitea:"
+echo "   cd gitea-bootstrap"
+echo "   terraform plan"
+echo "   terraform apply"
+echo "   cd .."
+echo ""
+echo "3. Setup Gitea repositories:"
+echo "   ./scripts/setup-gitea-repos.sh"
+echo ""
+echo "4. Deploy ArgoCD (choose one method):"
+echo "   Option A - Helm (simpler):"
+echo "     cd argocd-bootstrap-helm"
+echo "     terraform plan"
+echo "     terraform apply"
+echo ""
+echo "   Option B - GitOps Bridge (AWS best practices):"
+echo "     cd argocd-bootstrap-gitops-bridge"
+echo "     terraform plan"
+echo "     terraform apply"
+echo ""
 echo "5. Follow the workshop labs in README.md"

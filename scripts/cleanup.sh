@@ -25,13 +25,30 @@ else
     kubectl patch applications -n argocd --type json --patch='[{"op": "remove", "path": "/metadata/finalizers"}]' --all || true
 fi
 
-echo "🏗️  Destroying Terraform infrastructure..."
-terraform destroy -auto-approve
+echo "🏗️  Destroying ArgoCD infrastructure..."
+if [ -d "argocd-bootstrap-helm" ]; then
+    cd argocd-bootstrap-helm
+    terraform destroy -auto-approve || true
+    cd ..
+fi
 
-echo "🧽 Cleaning up local files..."
-rm -f terraform.tfstate*
-rm -f .terraform.lock.hcl
-rm -rf .terraform/
+if [ -d "argocd-bootstrap-gitops-bridge" ]; then
+    cd argocd-bootstrap-gitops-bridge
+    terraform destroy -auto-approve || true
+    cd ..
+fi
+
+echo "🏗️  Destroying Gitea infrastructure..."
+if [ -d "gitea-bootstrap" ]; then
+    cd gitea-bootstrap
+    terraform destroy -auto-approve || true
+    cd ..
+fi
+
+echo "🧽 Cleaning up local Terraform files..."
+rm -rf argocd-bootstrap-helm/.terraform* argocd-bootstrap-helm/terraform.tfstate*
+rm -rf argocd-bootstrap-gitops-bridge/.terraform* argocd-bootstrap-gitops-bridge/terraform.tfstate*
+rm -rf gitea-bootstrap/.terraform* gitea-bootstrap/terraform.tfstate*
 
 echo "✅ Cleanup complete!"
 echo ""

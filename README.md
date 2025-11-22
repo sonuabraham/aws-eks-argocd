@@ -24,6 +24,8 @@ This project provides Terraform configurations to deploy:
 **1. Deploy Gitea**
 
 ```bash
+cd gitea-bootstrap
+
 # Configure your cluster details
 cat > terraform.tfvars <<EOF
 region       = "us-east-1"
@@ -36,13 +38,27 @@ EOF
 terraform init && terraform apply
 
 # Setup repositories
+cd ..
 ./scripts/setup-gitea-repos.sh
 ```
 
 **2. Deploy ArgoCD**
 
+Choose one of the two methods:
+
+**Option A: Using Helm (simpler)**
+
 ```bash
-cd argocd-bootstrap
+cd argocd-bootstrap-helm
+terraform init && terraform apply
+```
+
+**Option B: Using GitOps Bridge (AWS best practices)**
+
+```bash
+cd argocd-bootstrap-gitops-bridge
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your cluster details
 terraform init && terraform apply
 ```
 
@@ -95,7 +111,9 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ### Technical Documentation
 
-- **[argocd-bootstrap/README.md](argocd-bootstrap/README.md)** - ArgoCD bootstrap technical docs
+- **[gitea-bootstrap/README.md](gitea-bootstrap/README.md)** - Gitea bootstrap technical docs
+- **[argocd-bootstrap-helm/README.md](argocd-bootstrap-helm/README.md)** - ArgoCD Helm bootstrap technical docs
+- **[argocd-bootstrap-gitops-bridge/README.md](argocd-bootstrap-gitops-bridge/README.md)** - ArgoCD GitOps Bridge technical docs
 
 ## Project Structure
 
@@ -107,23 +125,32 @@ argocd-eks/
 │   ├── ARGOCD_INSTALLATION.md         # ArgoCD setup
 │   ├── TROUBLESHOOTING.md             # Common issues
 │   └── ...                            # Other guides
-├── main.tf                            # Gitea deployment
-├── variables.tf                       # Gitea variables
-├── outputs.tf                         # Gitea outputs
-├── terraform.tfvars                   # Your configuration
-├── gitea-values.yaml                  # Gitea Helm values
-├── scripts/
-│   └── setup-gitea-repos.sh           # Repository setup script
-├── argocd-bootstrap/                  # ArgoCD deployment
+├── gitea-bootstrap/                   # Gitea deployment
+│   ├── main.tf                        # Gitea Terraform
+│   ├── variables.tf                   # Gitea variables
+│   ├── outputs.tf                     # Gitea outputs
+│   ├── terraform.tfvars               # Your configuration
+│   ├── gitea-values.yaml              # Gitea Helm values
+│   └── README.md                      # Gitea technical docs
+├── argocd-bootstrap-helm/             # ArgoCD deployment (Helm)
 │   ├── main.tf                        # ArgoCD Terraform
 │   ├── variables.tf                   # ArgoCD variables
 │   ├── outputs.tf                     # ArgoCD outputs
 │   ├── terraform.tfvars               # ArgoCD configuration
 │   ├── argocd-values.yaml             # ArgoCD Helm values
 │   └── README.md                      # ArgoCD technical docs
-└── applications/                      # Sample ArgoCD applications
-    ├── eks-workshop-app-dev/
-    └── eks-workshop-gitops-dev/
+├── argocd-bootstrap-gitops-bridge/    # ArgoCD deployment (GitOps Bridge)
+│   ├── main.tf                        # GitOps Bridge Terraform
+│   ├── variables.tf                   # GitOps Bridge variables
+│   ├── outputs.tf                     # GitOps Bridge outputs
+│   ├── terraform.tfvars.example       # Example configuration
+│   └── README.md                      # GitOps Bridge docs
+├── scripts/
+│   └── setup-gitea-repos.sh           # Repository setup script
+├── applications/                      # Sample ArgoCD applications
+│   ├── eks-workshop-app-dev/
+│   └── eks-workshop-gitops-dev/
+└── infra/                             # Infrastructure configurations
 ```
 
 ## What Gets Deployed
@@ -203,12 +230,12 @@ curl -s -u gitea:gitea123 http://localhost:3000/api/v1/user/repos | jq -r '.[].n
 ## Cleanup
 
 ```bash
-# Remove ArgoCD
-cd argocd-bootstrap
+# Remove ArgoCD (choose the method you used)
+cd argocd-bootstrap-helm  # or argocd-bootstrap-gitops-bridge
 terraform destroy
 
 # Remove Gitea
-cd ..
+cd ../gitea-bootstrap
 terraform destroy
 ```
 
