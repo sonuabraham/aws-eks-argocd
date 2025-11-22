@@ -49,3 +49,46 @@ variable "tags" {
     Project     = "eks-blueprints"
   }
 }
+
+variable "secret_name_git_data_addons" {
+  description = "Secret name for Git data addons"
+  type        = string
+  default     = "eks-blueprints-workshop-gitops-addons"
+}
+
+variable "secret_name_git_data_platform" {
+  description = "Secret name for Git data platform"
+  type        = string
+  default     = "eks-blueprints-workshop-gitops-platform"
+}
+
+variable "secret_name_git_data_workloads" {
+  description = "Secret name for Git data workloads"
+  type        = string
+  default     = "eks-blueprints-workshop-gitops-workloads"
+}
+
+variable "git_server_url" {
+  description = "Git server URL (used when Gitea is disabled)"
+  type        = string
+  default     = "https://github.com"
+}
+
+variable "git_username" {
+  description = "Git username for repository access"
+  type        = string
+  default     = "gitea"
+}
+
+variable "git_password" {
+  description = "Git password or token for repository access"
+  type        = string
+  default     = "gitea123"
+  sensitive   = true
+}
+
+variable "git_revision" {
+  description = "Git revision/branch to use"
+  type        = string
+  default     = "HEAD"
+}

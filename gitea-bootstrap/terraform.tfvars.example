@@ -19,6 +19,39 @@ enable_gitea = true
 # Enable ArgoCD installation (set to false if already installed on your cluster)
 enable_argocd = false
 
+################################################################################
+# Git Repository Configuration
+################################################################################
+# These values will be stored in AWS Secrets Manager
+
+# Git username (default: "gitea" for local Gitea server)
+git_username = "gitea"
+
+# Git password or token (default: "gitea123" for local Gitea server)
+# For GitHub, use a Personal Access Token
+# For GitLab, use a Personal Access Token or Deploy Token
+git_password = "gitea123"
+
+# Git server URL (only used when enable_gitea = false)
+# Examples:
+#   - GitHub: "https://github.com"
+#   - GitLab: "https://gitlab.com"
+#   - Custom: "https://git.example.com"
+git_server_url = "https://github.com"
+
+# Git revision/branch to track (default: "HEAD")
+git_revision = "HEAD"
+
+################################################################################
+# AWS Secrets Manager Secret Names
+################################################################################
+# These are the names of the secrets that will be created in AWS Secrets Manager
+# You can customize these if needed
+
+# secret_name_git_data_platform  = "eks-blueprints-workshop-gitops-platform"
+# secret_name_git_data_workloads = "eks-blueprints-workshop-gitops-workloads"
+# secret_name_git_data_addons    = "eks-blueprints-workshop-gitops-addons"
+
 # Tags to apply to resources
 tags = {
   Terraform   = "true"

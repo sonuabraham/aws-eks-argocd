@@ -42,8 +42,3 @@ output "argocd_cluster_registered" {
   description = "Spoke cluster registered with ArgoCD on hub cluster"
   value       = "Cluster ${local.name} registered with ArgoCD as ${kubernetes_secret.spoke_cluster_secret.metadata[0].name}"
 }
-
-output "cluster_security_group_id" {
-  description = "Cluster security group ID"
-  value       = module.eks.cluster_security_group_id
-}

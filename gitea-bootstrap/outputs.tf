@@ -57,3 +57,33 @@ output "gitea_credentials" {
     url      = "Access via LoadBalancer or port-forward to localhost:3000"
   } : null
 }
+
+################################################################################
+# GitOps Repository Secrets Outputs
+################################################################################
+output "gitops_secrets_created" {
+  description = "AWS Secrets Manager secrets created for GitOps repositories"
+  value = {
+    platform  = aws_secretsmanager_secret.gitops_platform.name
+    workloads = aws_secretsmanager_secret.gitops_workloads.name
+    addons    = aws_secretsmanager_secret.gitops_addons.name
+  }
+}
+
+output "gitops_platform_metadata" {
+  description = "GitOps platform repository metadata"
+  value       = jsondecode(aws_secretsmanager_secret_version.gitops_platform.secret_string)
+  sensitive   = true
+}
+
+output "gitops_workloads_metadata" {
+  description = "GitOps workloads repository metadata"
+  value       = jsondecode(aws_secretsmanager_secret_version.gitops_workloads.secret_string)
+  sensitive   = true
+}
+
+output "gitops_addons_metadata" {
+  description = "GitOps addons repository metadata"
+  value       = jsondecode(aws_secretsmanager_secret_version.gitops_addons.secret_string)
+  sensitive   = true
+}
