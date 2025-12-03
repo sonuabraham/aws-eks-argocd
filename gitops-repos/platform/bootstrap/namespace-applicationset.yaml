@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: create-namespace
+  namespace: argocd
+spec:
+  goTemplate: true
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  generators:
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  fleet_member: hub
+          - git:
+              repoURL: '{{ .metadata.annotations.platform_repo_url }}'
+              revision: '{{ .metadata.annotations.platform_repo_revision }}'
+              directories:
+                - path: 'config/*/namespace'
+  template:
+    metadata:
+      name: 'create-namespace-{{ index .path.segments 1 }}'
+      labels:
+        environment: '{{ .metadata.labels.environment }}'
+        tenant: '{{ index .path.segments 1 }}'
+        workloads: 'true'
+        
+    spec:
+      project: default
+      source:
+        repoURL: '{{ .metadata.annotations.platform_repo_url }}'
+        path: '{{ .path.path }}'
+        targetRevision: '{{ .metadata.annotations.platform_repo_revision }}'
+      destination:
+        name: '{{ .name }}'
+      syncPolicy:
+        automated:
+          allowEmpty: true
+        retry:
+          backoff:
+            duration: 1m
+            #limit: 100
+        syncOptions:
+          - CreateNamespace=true
