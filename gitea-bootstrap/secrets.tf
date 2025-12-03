@@ -10,7 +10,7 @@ locals {
 
   # Repository names
   platform_repo  = "eks-blueprints-workshop-gitops-platform"
-  workloads_repo = "eks-blueprints-workshop-gitops-workloads"
+  workloads_repo = "eks-blueprints-workshop-gitops-apps"
   addons_repo    = "eks-blueprints-workshop-gitops-addons"
 }
 
