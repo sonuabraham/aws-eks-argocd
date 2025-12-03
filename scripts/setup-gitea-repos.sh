@@ -101,8 +101,20 @@ create_repo "eks-blueprints-workshop-gitops-addons" "EKS Blueprints Workshop - A
 echo "⏳ Waiting for repositories to initialize..."
 sleep 3
 
-# Clone and push sample content
-echo "📦 Setting up repository content..."
+# Clone and push content from local gitops-repos
+echo "📦 Setting up repository content from local gitops-repos..."
+
+# Get the script directory to find gitops-repos
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+GITOPS_REPOS_DIR="$SCRIPT_DIR/../gitops-repos"
+
+# Check if gitops-repos directory exists
+if [ ! -d "$GITOPS_REPOS_DIR" ]; then
+    echo "❌ Error: gitops-repos directory not found at $GITOPS_REPOS_DIR"
+    exit 1
+fi
+
+echo "📂 Using gitops-repos from: $GITOPS_REPOS_DIR"
 
 # Create temporary directory
 TEMP_DIR=$(mktemp -d)
@@ -112,76 +124,31 @@ cd "$TEMP_DIR"
 git config --global user.email "workshop-user@example.com"
 git config --global user.name "workshop-user"
 
-# Setup eks-blueprints-workshop-gitops-apps repository
+# Setup eks-blueprints-workshop-gitops-apps repository (workloads)
 echo "📤 Setting up eks-blueprints-workshop-gitops-apps..."
 if git clone "http://$GITEA_USER:$GITEA_PASS@$GITEA_URL/$GITEA_USER/eks-blueprints-workshop-gitops-apps.git" 2>/dev/null; then
     cd eks-blueprints-workshop-gitops-apps
     
-    # Create sample application manifests
-    mkdir -p guestbook
+    # Remove existing content except .git
+    find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
     
-    cat > guestbook/deployment.yaml <<'EOF'
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: guestbook-ui
-spec:
-  replicas: 1
-  revisionHistoryLimit: 3
-  selector:
-    matchLabels:
-      app: guestbook-ui
-  template:
-    metadata:
-      labels:
-        app: guestbook-ui
-    spec:
-      containers:
-      - image: gcr.io/google-samples/gb-frontend:v5
-        name: guestbook-ui
-        ports:
-        - containerPort: 80
-        env:
-        - name: GET_HOSTS_FROM
-          value: dns
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 200m
-            memory: 200Mi
-EOF
-
-    cat > guestbook/service.yaml <<'EOF'
-apiVersion: v1
-kind: Service
-metadata:
-  name: guestbook-ui
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-    service.beta.kubernetes.io/aws-load-balancer-type: external
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 80
-  selector:
-    app: guestbook-ui
-EOF
-
-    cat > README.md <<'EOF'
-# EKS Blueprints Workshop - GitOps Apps
-
-Application configurations for the EKS Blueprints Workshop.
-
-## Applications
-- guestbook - Simple guestbook application
-EOF
-
-    git add .
-    git commit -m "Initial application configurations" || echo "No changes"
-    git push origin main || echo "Already up to date"
+    # Copy content from local workloads folder (excluding .git)
+    if [ -d "$GITOPS_REPOS_DIR/workloads" ]; then
+        rsync -av --exclude='.git' "$GITOPS_REPOS_DIR/workloads/" . 2>/dev/null || \
+        (shopt -s dotglob; for f in "$GITOPS_REPOS_DIR/workloads/"*; do [ "$(basename "$f")" != ".git" ] && cp -r "$f" . 2>/dev/null; done; shopt -u dotglob)
+        echo "   ✓ Copied workloads content"
+    else
+        echo "   ⚠️  workloads directory not found"
+    fi
+    
+    git add -A
+    if git diff --cached --quiet; then
+        echo "   ✓ No changes to commit"
+    else
+        git commit -m "Update application configurations from local gitops-repos"
+        git push -f origin main
+        echo "   ✓ Pushed changes"
+    fi
     cd ..
 else
     echo "⚠️  Could not clone eks-blueprints-workshop-gitops-apps"
@@ -192,22 +159,26 @@ echo "📤 Setting up eks-blueprints-workshop-gitops-platform..."
 if git clone "http://$GITEA_USER:$GITEA_PASS@$GITEA_URL/$GITEA_USER/eks-blueprints-workshop-gitops-platform.git" 2>/dev/null; then
     cd eks-blueprints-workshop-gitops-platform
     
-    # Create platform configuration
-    cat > README.md <<'EOF'
-# EKS Blueprints Workshop - GitOps Platform
-
-Platform-level configurations for the EKS Blueprints Workshop.
-
-This repository contains platform infrastructure and configuration managed via GitOps.
-EOF
-
-    cat > .gitkeep <<'EOF'
-# Platform configurations will be added here
-EOF
-
-    git add .
-    git commit -m "Initial platform configuration" || echo "No changes"
-    git push origin main || echo "Already up to date"
+    # Remove existing content except .git
+    find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+    
+    # Copy content from local platform folder (excluding .git)
+    if [ -d "$GITOPS_REPOS_DIR/platform" ]; then
+        rsync -av --exclude='.git' "$GITOPS_REPOS_DIR/platform/" . 2>/dev/null || \
+        (shopt -s dotglob; for f in "$GITOPS_REPOS_DIR/platform/"*; do [ "$(basename "$f")" != ".git" ] && cp -r "$f" . 2>/dev/null; done; shopt -u dotglob)
+        echo "   ✓ Copied platform content"
+    else
+        echo "   ⚠️  platform directory not found"
+    fi
+    
+    git add -A
+    if git diff --cached --quiet; then
+        echo "   ✓ No changes to commit"
+    else
+        git commit -m "Update platform configurations from local gitops-repos"
+        git push -f origin main
+        echo "   ✓ Pushed changes"
+    fi
     cd ..
 else
     echo "⚠️  Could not clone eks-blueprints-workshop-gitops-platform"
@@ -218,22 +189,26 @@ echo "📤 Setting up eks-blueprints-workshop-gitops-addons..."
 if git clone "http://$GITEA_USER:$GITEA_PASS@$GITEA_URL/$GITEA_USER/eks-blueprints-workshop-gitops-addons.git" 2>/dev/null; then
     cd eks-blueprints-workshop-gitops-addons
     
-    # Create addons structure
-    cat > README.md <<'EOF'
-# EKS Blueprints Workshop - GitOps Addons
-
-Cluster addons configurations for the EKS Blueprints Workshop.
-
-This repository contains addon configurations managed via GitOps.
-EOF
-
-    cat > .gitkeep <<'EOF'
-# Addon configurations will be added here
-EOF
-
-    git add .
-    git commit -m "Initial addons configuration" || echo "No changes"
-    git push origin main || echo "Already up to date"
+    # Remove existing content except .git
+    find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+    
+    # Copy content from local addons folder (excluding .git)
+    if [ -d "$GITOPS_REPOS_DIR/addons" ]; then
+        rsync -av --exclude='.git' "$GITOPS_REPOS_DIR/addons/" . 2>/dev/null || \
+        (shopt -s dotglob; for f in "$GITOPS_REPOS_DIR/addons/"*; do [ "$(basename "$f")" != ".git" ] && cp -r "$f" . 2>/dev/null; done; shopt -u dotglob)
+        echo "   ✓ Copied addons content"
+    else
+        echo "   ⚠️  addons directory not found"
+    fi
+    
+    git add -A
+    if git diff --cached --quiet; then
+        echo "   ✓ No changes to commit"
+    else
+        git commit -m "Update addons configurations from local gitops-repos"
+        git push -f origin main
+        echo "   ✓ Pushed changes"
+    fi
     cd ..
 else
     echo "⚠️  Could not clone eks-blueprints-workshop-gitops-addons"
